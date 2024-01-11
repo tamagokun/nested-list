@@ -1,11 +1,11 @@
-import * as Dom from './utils/dom';
-import Caret from './utils/caret';
-import { IconListBulleted, IconListNumbered } from '@codexteam/icons';
+import * as Dom from "./utils/dom";
+import Caret from "./utils/caret";
+import { IconListBulleted, IconListNumbered } from "@codexteam/icons";
 
 /**
  * Build styles
  */
-import './../styles/index.pcss';
+import "./../styles/index.pcss";
 
 /**
  * @typedef {object} ListData
@@ -52,7 +52,7 @@ export default class NestedList {
   static get toolbox() {
     return {
       icon: IconListNumbered,
-      title: 'List',
+      title: "List",
     };
   }
 
@@ -80,14 +80,17 @@ export default class NestedList {
     /**
      * Set the default list style from the config.
      */
-    this.defaultListStyle = this.config.defaultStyle === 'ordered'  ? 'ordered' : 'unordered';
-
+    this.defaultListStyle =
+      this.config.defaultStyle === "ordered" ? "ordered" : "unordered";
 
     const initialData = {
       style: this.defaultListStyle,
       items: [],
     };
-    this.data = data && Object.keys(data).length ? data : initialData;
+    this.data =
+      data && Object.keys(data).length
+        ? compatibilitySupport(data)
+        : initialData;
 
     /**
      * Instantiate caret helper
@@ -102,37 +105,48 @@ export default class NestedList {
    * @public
    */
   render() {
-    this.nodes.wrapper = this.makeListWrapper(this.data.style, [ this.CSS.baseBlock ]);
+    this.nodes.wrapper = this.makeListWrapper(this.data.style, [
+      this.CSS.baseBlock,
+    ]);
 
     // fill with data
     if (this.data.items.length) {
       this.appendItems(this.data.items, this.nodes.wrapper);
     } else {
-      this.appendItems([ {
-        content: '',
-        items: [],
-      } ], this.nodes.wrapper);
+      this.appendItems(
+        [
+          {
+            content: "",
+            items: [],
+          },
+        ],
+        this.nodes.wrapper
+      );
     }
 
     if (!this.readOnly) {
       // detect keydown on the last item to escape List
-      this.nodes.wrapper.addEventListener('keydown', (event) => {
-        switch (event.key) {
-          case 'Enter':
-            this.enterPressed(event);
-            break;
-          case 'Backspace':
-            this.backspace(event);
-            break;
-          case 'Tab':
-            if (event.shiftKey) {
-              this.shiftTab(event);
-            } else {
-              this.addTab(event);
-            }
-            break;
-        }
-      }, false);
+      this.nodes.wrapper.addEventListener(
+        "keydown",
+        (event) => {
+          switch (event.key) {
+            case "Enter":
+              this.enterPressed(event);
+              break;
+            case "Backspace":
+              this.backspace(event);
+              break;
+            case "Tab":
+              if (event.shiftKey) {
+                this.shiftTab(event);
+              } else {
+                this.addTab(event);
+              }
+              break;
+          }
+        },
+        false
+      );
     }
 
     return this.nodes.wrapper;
@@ -147,18 +161,18 @@ export default class NestedList {
   renderSettings() {
     const tunes = [
       {
-        name: 'unordered',
-        label: this.api.i18n.t('Unordered'),
+        name: "unordered",
+        label: this.api.i18n.t("Unordered"),
         icon: IconListBulleted,
       },
       {
-        name: 'ordered',
-        label: this.api.i18n.t('Ordered'),
+        name: "ordered",
+        label: this.api.i18n.t("Ordered"),
         icon: IconListNumbered,
       },
     ];
 
-    return tunes.map(tune => ({
+    return tunes.map((tune) => ({
       name: tune.name,
       icon: tune.icon,
       label: tune.label,
@@ -177,7 +191,7 @@ export default class NestedList {
    */
   static get pasteConfig() {
     return {
-      tags: ['OL', 'UL', 'LI'],
+      tags: ["OL", "UL", "LI"],
     };
   }
 
@@ -212,14 +226,14 @@ export default class NestedList {
 
     // set list style and tag to search.
     switch (tag) {
-      case 'OL':
-        style = 'ordered';
-        tagToSearch = 'ol';
+      case "OL":
+        style = "ordered";
+        tagToSearch = "ol";
         break;
-      case 'UL':
-      case 'LI':
-        style = 'unordered';
-        tagToSearch = 'ul';
+      case "UL":
+      case "LI":
+        style = "unordered";
+        tagToSearch = "ul";
     }
 
     const data = {
@@ -238,7 +252,7 @@ export default class NestedList {
         // get subitems.
         const subItems = subItemsWrapper ? getPastedItems(subItemsWrapper) : [];
         // get text content of the li element.
-        const content = child?.firstChild?.textContent || '';
+        const content = child?.firstChild?.textContent || "";
 
         return {
           content,
@@ -276,9 +290,9 @@ export default class NestedList {
    * @returns {Element}
    */
   createItem(content, items = []) {
-    const itemWrapper = Dom.make('li', this.CSS.item);
-    const itemBody = Dom.make('div', this.CSS.itemBody);
-    const itemContent = Dom.make('div', this.CSS.itemContent, {
+    const itemWrapper = Dom.make("li", this.CSS.item);
+    const itemBody = Dom.make("div", this.CSS.itemBody);
+    const itemContent = Dom.make("div", this.CSS.itemContent, {
       innerHTML: content,
       contentEditable: !this.readOnly,
     });
@@ -309,9 +323,11 @@ export default class NestedList {
      * @returns {ListItem[]}
      */
     const getItems = (parent) => {
-      const children = Array.from(parent.querySelectorAll(`:scope > .${this.CSS.item}`));
+      const children = Array.from(
+        parent.querySelectorAll(`:scope > .${this.CSS.item}`)
+      );
 
-      return children.map(el => {
+      return children.map((el) => {
         const subItemsWrapper = el.querySelector(`.${this.CSS.itemChildren}`);
         const content = this.getItemContent(el);
         const subItems = subItemsWrapper ? getItems(subItemsWrapper) : [];
@@ -337,7 +353,9 @@ export default class NestedList {
    */
   addChildrenList(parentItem, items) {
     const itemBody = parentItem.querySelector(`.${this.CSS.itemBody}`);
-    const sublistWrapper = this.makeListWrapper(undefined, [ this.CSS.itemChildren ]);
+    const sublistWrapper = this.makeListWrapper(undefined, [
+      this.CSS.itemChildren,
+    ]);
 
     this.appendItems(items, sublistWrapper);
 
@@ -352,8 +370,9 @@ export default class NestedList {
    * @returns {HTMLOListElement|HTMLUListElement}
    */
   makeListWrapper(style = this.listStyle, classes = []) {
-    const tag = style === 'ordered' ? 'ol' : 'ul';
-    const styleClass = style === 'ordered' ? this.CSS.wrapperOrdered : this.CSS.wrapperUnordered;
+    const tag = style === "ordered" ? "ol" : "ul";
+    const styleClass =
+      style === "ordered" ? this.CSS.wrapperOrdered : this.CSS.wrapperUnordered;
 
     classes.push(styleClass);
 
@@ -369,14 +388,14 @@ export default class NestedList {
   get CSS() {
     return {
       baseBlock: this.api.styles.block,
-      wrapper: 'cdx-nested-list',
-      wrapperOrdered: 'cdx-nested-list--ordered',
-      wrapperUnordered: 'cdx-nested-list--unordered',
-      item: 'cdx-nested-list__item',
-      itemBody: 'cdx-nested-list__item-body',
-      itemContent: 'cdx-nested-list__item-content',
-      itemChildren: 'cdx-nested-list__item-children',
-      settingsWrapper: 'cdx-nested-list__settings',
+      wrapper: "cdx-nested-list",
+      wrapperOrdered: "cdx-nested-list--ordered",
+      wrapperUnordered: "cdx-nested-list--unordered",
+      item: "cdx-nested-list__item",
+      itemBody: "cdx-nested-list__item-body",
+      itemContent: "cdx-nested-list__item-content",
+      itemChildren: "cdx-nested-list__item-children",
+      settingsWrapper: "cdx-nested-list__settings",
       settingsButton: this.api.styles.settingsButton,
       settingsButtonActive: this.api.styles.settingsButtonActive,
     };
@@ -402,7 +421,9 @@ export default class NestedList {
      *
      * @type {any[]}
      */
-    const lists = Array.from(this.nodes.wrapper.querySelectorAll(`.${this.CSS.wrapper}`));
+    const lists = Array.from(
+      this.nodes.wrapper.querySelectorAll(`.${this.CSS.wrapper}`)
+    );
 
     /**
      * Add main wrapper to the list
@@ -412,9 +433,9 @@ export default class NestedList {
     /**
      * For each list we need to update classes
      */
-    lists.forEach(list => {
-      list.classList.toggle(this.CSS.wrapperUnordered, style === 'unordered');
-      list.classList.toggle(this.CSS.wrapperOrdered, style === 'ordered');
+    lists.forEach((list) => {
+      list.classList.toggle(this.CSS.wrapperUnordered, style === "unordered");
+      list.classList.toggle(this.CSS.wrapperOrdered, style === "ordered");
     });
 
     /**
@@ -501,7 +522,9 @@ export default class NestedList {
      *
      * @type {boolean}
      */
-    const childrenExist = itemChildren && Array.from(itemChildren.querySelectorAll(`.${this.CSS.item}`)).length > 0;
+    const childrenExist =
+      itemChildren &&
+      Array.from(itemChildren.querySelectorAll(`.${this.CSS.item}`)).length > 0;
 
     /**
      * If item has children, prepend to them
@@ -541,8 +564,11 @@ export default class NestedList {
     /**
      * If previous parent's children list is now empty, remove it.
      */
-    const prevParentChildrenList = parentItem.querySelector(`.${this.CSS.itemChildren}`);
-    const isPrevParentChildrenEmpty = prevParentChildrenList.children.length === 0;
+    const prevParentChildrenList = parentItem.querySelector(
+      `.${this.CSS.itemChildren}`
+    );
+    const isPrevParentChildrenEmpty =
+      prevParentChildrenList.children.length === 0;
 
     if (isPrevParentChildrenEmpty) {
       prevParentChildrenList.remove();
@@ -559,7 +585,7 @@ export default class NestedList {
     const contentNode = item.querySelector(`.${this.CSS.itemContent}`);
 
     if (Dom.isEmpty(contentNode)) {
-      return '';
+      return "";
     }
 
     return contentNode.innerHTML;
@@ -655,7 +681,9 @@ export default class NestedList {
      * Otherwise we will use the parent item
      */
     if (previousItem) {
-      const childrenOfPreviousItem = previousItem.querySelectorAll(`.${this.CSS.item}`);
+      const childrenOfPreviousItem = previousItem.querySelectorAll(
+        `.${this.CSS.item}`
+      );
 
       targetItem = Array.from(childrenOfPreviousItem).pop() || previousItem;
     } else {
@@ -671,7 +699,9 @@ export default class NestedList {
     /**
      * Get the target item content element
      */
-    const targetItemContent = targetItem.querySelector(`.${this.CSS.itemContent}`);
+    const targetItemContent = targetItem.querySelector(
+      `.${this.CSS.itemContent}`
+    );
 
     /**
      * Set a new place for caret
@@ -686,12 +716,14 @@ export default class NestedList {
     /**
      * Update target item content by merging with current item html content
      */
-    targetItemContent.insertAdjacentHTML('beforeend', endingHTML);
+    targetItemContent.insertAdjacentHTML("beforeend", endingHTML);
 
     /**
      * Get the sublist first-level items for current item
      */
-    let currentItemSublistItems = currentItem.querySelectorAll(`.${this.CSS.itemChildren} > .${this.CSS.item}`);
+    let currentItemSublistItems = currentItem.querySelectorAll(
+      `.${this.CSS.itemChildren} > .${this.CSS.item}`
+    );
 
     /**
      * Create an array from current item sublist items
@@ -702,12 +734,14 @@ export default class NestedList {
      * Filter items for sublist first-level
      * No need to move deeper items
      */
-    currentItemSublistItems = currentItemSublistItems.filter(node => node.parentNode.closest(`.${this.CSS.item}`) === currentItem);
+    currentItemSublistItems = currentItemSublistItems.filter(
+      (node) => node.parentNode.closest(`.${this.CSS.item}`) === currentItem
+    );
 
     /**
      * Reverse the array to insert items
      */
-    currentItemSublistItems.reverse().forEach(item => {
+    currentItemSublistItems.reverse().forEach((item) => {
       /**
        * Check if we need to save the indent for current item children
        *
@@ -791,7 +825,9 @@ export default class NestedList {
       return;
     }
 
-    const prevItemChildrenList = prevItem.querySelector(`.${this.CSS.itemChildren}`);
+    const prevItemChildrenList = prevItem.querySelector(
+      `.${this.CSS.itemChildren}`
+    );
 
     this.caret.save();
 
@@ -806,7 +842,9 @@ export default class NestedList {
        * - Create and append children wrapper to the previous item
        * - Append current item to it
        */
-      const sublistWrapper = this.makeListWrapper(undefined, [ this.CSS.itemChildren ]);
+      const sublistWrapper = this.makeListWrapper(undefined, [
+        this.CSS.itemChildren,
+      ]);
       const prevItemBody = prevItem.querySelector(`.${this.CSS.itemBody}`);
 
       sublistWrapper.appendChild(currentItem);
@@ -840,6 +878,26 @@ export default class NestedList {
   }
 
   /**
+   * Convert the editorJS/list data to the listData format
+   * @param {ListData} data
+   * @returns {ListData}
+   */
+  compatibilitySupport(data) {
+    if (
+      data.items &&
+      data.items.length > 0 &&
+      typeof data.items[0] === "string"
+    ) {
+      return data.items.map((text) => ({
+        content: text,
+        items: [],
+      }));
+    }
+
+    return data;
+  }
+
+  /**
    * Convert from list to text for conversionConfig
    *
    * @param {ListData} data
@@ -848,7 +906,7 @@ export default class NestedList {
   static joinRecursive(data) {
     return data.items
       .map((item) => `${item.content} ${NestedList.joinRecursive(item)}`)
-      .join('');
+      .join("");
   }
 
   /**
@@ -861,11 +919,13 @@ export default class NestedList {
       },
       import: (content) => {
         return {
-          items: [ {
-            content,
-            items: [],
-          } ],
-          style: 'unordered',
+          items: [
+            {
+              content,
+              items: [],
+            },
+          ],
+          style: "unordered",
         };
       },
     };
