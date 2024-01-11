@@ -89,7 +89,7 @@ export default class NestedList {
     };
     this.data =
       data && Object.keys(data).length
-        ? compatibilitySupport(data)
+        ? this.compatibilitySupport(data)
         : initialData;
 
     /**
@@ -888,10 +888,13 @@ export default class NestedList {
       data.items.length > 0 &&
       typeof data.items[0] === "string"
     ) {
-      return data.items.map((text) => ({
-        content: text,
-        items: [],
-      }));
+      return {
+        ...data,
+        items: data.items.map((text) => ({
+          content: text,
+          items: [],
+        })),
+      };
     }
 
     return data;
