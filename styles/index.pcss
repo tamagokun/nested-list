@@ -10,7 +10,7 @@
     display: flex;
     margin: 2px 0;
 
-    [contenteditable]{
+    [contenteditable] {
       outline: none;
     }
 
@@ -28,7 +28,8 @@
       white-space: pre-wrap;
     }
 
-    &-children {}
+    &-children {
+    }
 
     &::before {
       counter-increment: item;
@@ -43,6 +44,73 @@
 
   &--unordered > &__item::before {
     content: "•";
+  }
+
+  &--unordered &--unordered > &__item::before {
+    content: "◦";
+  }
+
+  &--unordered &--unordered &--unordered > &__item::before {
+    content: "▪";
+  }
+
+  &--unordered &--unordered &--unordered &--unordered > &__item::before {
+    content: "•";
+  }
+
+  &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    > &__item::before {
+    content: "◦";
+  }
+
+  &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    > &__item::before {
+    content: "▪";
+  }
+
+  &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    > &__item::before {
+    content: "•";
+  }
+
+  &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    > &__item::before {
+    content: "◦";
+  }
+
+  &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    &--unordered
+    > &__item::before {
+    content: "▪";
   }
 
   &__settings {
